@@ -1,17 +1,17 @@
-acl internal { 10.0.0.0/24; };
+# Алиасы
+User_Alias    OPERATORS = user1, user2
+User_Alias    ADMINS    = sshuser, admin
 
-options {
-    tkey-gssapi-keytab "/var/lib/samba/bind-dns/dns.keytab";
-    minimal-responses yes;
+Host_Alias    INTERNAL  = 10.0.0.10, 10.0.0.20
+Host_Alias    DMZ       = 192.168.1.100
 
-    listen-on { 127.0.0.1; 10.0.0.10; };
-    //listen-on-v6 { ::1; };
-    forward first;
-    forwarders { 77.88.8.88; };
-    allow-recursion { 127.0.0.1; internal; };
-    allow-query { 127.0.0.1; internal; };
+Cmnd_Alias    SERVICES  = /sbin/service, /sbin/reboot, /sbin/shutdown
+Cmnd_Alias    PKGMGMT   = /usr/bin/apt-get, /usr/sbin/update-alternatives
 
-    logging {
-        category lame-servers { null; };
-    };
-};
+# Правила
+ADMINS    ALL = (ALL) ALL
+OPERATORS INTERNAL = (root) SERVICES
+%wheel    ALL = (ALL) ALL
+
+# Ограничение: пользователь user3 может только обновлять пакеты
+user3     ALL = (root) PKGMGMT
