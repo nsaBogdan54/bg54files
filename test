@@ -1,17 +1,13 @@
-# Алиасы
-User_Alias    OPERATORS = user1, user2
-User_Alias    ADMINS    = sshuser, admin
+# Сгенерировано Ansible
+User_Alias OPERATORS = {% for u in sudo_users %}{{ u.name }}{% if not loop.last %}, {% endif %}{% endfor %}
 
-Host_Alias    INTERNAL  = 10.0.0.10, 10.0.0.20
-Host_Alias    DMZ       = 192.168.1.100
-
-Cmnd_Alias    SERVICES  = /sbin/service, /sbin/reboot, /sbin/shutdown
-Cmnd_Alias    PKGMGMT   = /usr/bin/apt-get, /usr/sbin/update-alternatives
+Cmnd_Alias SYSCTL = /sbin/reboot, /bin/systemctl restart *, /bin/systemctl stop *, /bin/systemctl start *
+Cmnd_Alias DEPLOY = /opt/deploy/*.sh
 
 # Правила
-ADMINS    ALL = (ALL) ALL
-OPERATORS INTERNAL = (root) SERVICES
-%wheel    ALL = (ALL) ALL
+{% for user in sudo_users %}
+{{ user.name }} ALL = (root) {{ 'SYSCTL' if 'systemctl' in user.commands else 'DEPLOY' }}
+{% endfor %}
 
-# Ограничение: пользователь user3 может только обновлять пакеты
-user3     ALL = (root) PKGMGMT
+# Полный доступ для группы admins
+%admins ALL=(ALL) ALL
