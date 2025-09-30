@@ -1,13 +1,17 @@
-# Сгенерировано Ansible
-User_Alias OPERATORS = {% for u in sudo_users %}{{ u.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+acl internal { 10.0.0.0/24; };
 
-Cmnd_Alias SYSCTL = /sbin/reboot, /bin/systemctl restart *, /bin/systemctl stop *, /bin/systemctl start *
-Cmnd_Alias DEPLOY = /opt/deploy/*.sh
+options {
+    tkey-gssapi-keytab "/var/lib/samba/bind-dns/dns.keytab";
+    minimal-responses yes;
 
-# Правила
-{% for user in sudo_users %}
-{{ user.name }} ALL = (root) {{ 'SYSCTL' if 'systemctl' in user.commands else 'DEPLOY' }}
-{% endfor %}
+    listen-on { 127.0.0.1; 10.0.0.10; };
+    //listen-on-v6 { ::1; };
+    forward first;
+    forwarders { 77.88.8.88; };
+    allow-recursion { 127.0.0.1; internal; };
+    allow-query { 127.0.0.1; internal; };
 
-# Полный доступ для группы admins
-%admins ALL=(ALL) ALL
+    logging {
+        category lame-servers { null; };
+    };
+};
