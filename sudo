@@ -1,1 +1,13 @@
-jj
+# Сгенерировано Ansible
+User_Alias OPERATORS = {% for u in sudo_users %}{{ u.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+
+Cmnd_Alias SYSCTL = /sbin/reboot, /bin/systemctl restart *, /bin/systemctl stop *, /bin/systemctl start *
+Cmnd_Alias DEPLOY = /opt/deploy/*.sh
+
+# Правила
+{% for user in sudo_users %}
+{{ user.name }} ALL = (root) {{ 'SYSCTL' if 'systemctl' in user.commands else 'DEPLOY' }}
+{% endfor %}
+
+# Полный доступ для группы admins
+%admins ALL=(ALL) ALL
